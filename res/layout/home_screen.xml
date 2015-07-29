@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <include
+        android:id="@+id/home_screen_top_rel"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        layout="@layout/top_bar" />
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/home_screen_top_rel" >
+
+        <FrameLayout
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/left_layout"
+            android:layout_width="200dp"
+            android:layout_gravity="start"
+            android:layout_height="match_parent"
+            android:background="@color/list_bcg" >
+
+            <ListView
+                android:id="@+id/left_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/list_bcg"
+                android:divider="@drawable/list_divider"
+                android:dividerHeight="1dp"
+                android:listSelector="@color/list_bcg"
+                android:scrollbars="none" />
+        </RelativeLayout>
+    </android.support.v4.widget.DrawerLayout>
+
+</RelativeLayout>

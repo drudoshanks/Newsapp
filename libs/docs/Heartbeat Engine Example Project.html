@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Event%20Engine%20Example%20Project.html">Prev</a>
+</li><li>
+<a href="Transition-ExampleApp.html">Next</a>
+</li></ul></div>
+<h1 id="heartbeat-engine-example-project">Heartbeat Engine Example Project</h1>
+<p>The Heartbeat Engine is a continuous encoding solution intended to provide broadcast media with channel and timestamp information, by encoding content in real-time. The aim of the engine is to achieve perfect synchronisation of an app with the real-time encoded content, allowing the app to trigger actions at specific points in time without having to worry about the the technical details of codewords and their latency.</p>
+<p>The main difference between the Event Engine and the Heartbeat Engine is that every event is timestamped to a specific absolute time and date, rather than a time relative to the start of the encoded media, as is the case with the Event Engine.</p>
+<p>Included with the SDK Decoder Library is an example app that uses the Heartbeat Engine, called <strong>HBExample</strong>. Feel free to examine the app’s source code to aid your understanding of how to integrate the Intrasonics Decoder and Heartbeat Engine into your app. You may copy any useful code into your own project.</p>
+<h2 id="building-and-running-the-heart-engine-example">Building and Running the Heart Engine Example</h2>
+<p>After unzipping the Heartbeat Engine example app zip file <strong>HBEngineExample.zip</strong>, import the project into Eclipse. From the <code>File</code> menu, select <code>Import...</code>, then open the <code>General</code> category and select <code>Existing Projects into Workspace</code>. Follow the prompts to import the project.</p>
+<p>You should now be able to build and run the app on an Android device.</p>
+<p>If you need guidance on building and running Android applications, refer to the Android Developer’s Guide, at <a href="http://developer.android.com/guide" target="developer.android.com.guide">http://developer.android.com/guide</a>, specifically the section on <strong>Building and Running</strong>: <a href="http://developer.android.com/guide/developing/building" target="developer.android.com.guide.building">http://developer.android.com/guide/developing/building</a>.</p>
+<p>The following screenshot shows the Heartbeat Engine Example decoding audio that has been encoded using the <strong>daily</strong> Heartbeat cycle:</p>
+<center>
+<img alt="Event Engine example app output" src="images/heartbeat engine screen 00.png" width="320" />
+</center>
+
+<blockquote>
+<p><strong>Note:</strong> As the Heartbeat Engine is intended to work only with a real-time encoder, there are no test audio or video tracks on the Developer Portal for use with this example app. A real-time encoder is required to produce audio for testing the Heartbeat Engine.</p>
+</blockquote>
+<h2 id="notes-on-the-app-code">Notes on the App Code</h2>
+<p>The following fragments of code correspond to the steps outlined in <strong>Using the Intrasonics Decoder</strong> in <a href="Decoder%20Basics.html">Decoder Basics</a>:</p>
+<p><strong>1. Instantiate the Decoder singleton</strong></p>
+<p>This is a single line of code, to instantiate (if not instantiated before) and get a reference to the Decoder singleton:</p>
+<pre><code>Decoder mDecoder = Decoder.getInstance();</code></pre>
+<p><strong>2. Pass the Application Context to the Decoder</strong></p>
+<pre><code>mDecoder.setApplicationContext(getApplicationContext());</code></pre>
+<p><strong>3. Register as a Decoder listener</strong></p>
+<p>The HBExample app's main Activity class implements the <code>DecoderListener</code> interface, allowing it to receive state change, failure and confidence messages (see <a href="com/intrasonics/DecoderListener.html">DecoderListener</a>) by registering as a Decoder listener:</p>
+<pre><code>mDecoder.registerListener(this);</code></pre>
+<p><strong>4. Pass a token to the Decoder</strong></p>
+<p>The app reads a Decoder token from a file and passes it to the Decoder. This is the simplest behaviour, but as the Decoder expects the token in a Java String, it should be quite simple to implement other approaches, such as downloading from a web server.</p>
+<pre><code>private String mTokenFileName = &quot;Token.json&quot;;
+    .
+    .
+mDecoder.setToken(readTokenFromFile(mTokenFileName));
+    .
+    .
+/**
+ * Read a token file into a string, ready for passing to the decoder.
+ * 
+ * @param fileName The name of the file containing the token data
+ * 
+ * @return A String holding the contents of the specified file
+ * 
+ * @throws IOException Upon failure to open and read the file
+ */
+public String readTokenFromFile(String fileName) throws IOException
+{
+    .
+    .
+}</code></pre>
+<p><strong>5. Connect as an Engine listener</strong></p>
+<p>The HBExample app's main Activity class implements the <code>IHeartbeatEngineListener</code> interface, allowing it to receive beats from the Heartbeat Engine via the <code>onHBEngineDidBeatAtTime()</code> method by connecting to the Heartbeat Engine:</p>
+<pre><code>IHeartbeatEngine heartbeatEngine = (IHeartbeatEngine)mDecoder.connectToEngine(this, IHeartbeatEngine.class);</code></pre>
+<p><strong>7. Start the Decoder</strong></p>
+<p>Finally, the Decoder is started.</p>
+<pre><code>mDecoder.startDecoding();</code></pre>
+<h2 id="decoding-audio">Decoding Audio</h2>
+<p>When Intrasonics-encoded content is subsequently played to the Heartbeat Engine Example app, provided it has been encoded for the Heartbeat Engine and the supplied token authorises the use of the Heartbeat Engine, the app will receive beats from the Decoder containing details of the absolute time within the encoded track through the <code>onHBEngineDidBeatAtTime</code> method:</p>
+<pre><code>/**
+ * IHeartbeatEngineListener method for handling a Heartbeat event.
+ * 
+ * @param beatatTimeParams The data provided by the Heartbeat Engine
+ */
+public void onHBEngineDidBeatAtTime(BeatAtTimeParams beatAtTimeParams) 
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeBeatAtTime, beatAtTimeParams));
+}</code></pre>
+<p>The Heartbeat Engine Example app simply passes the heartbeat data to the main UI thread, so that it can displayed on the app's UI.</p>
+<p>The Decoder will also inform the app of changes in confidence, to reflect how sure it is that it is receiving Intrasonics-encoded audio, through the onDecoderConfidenceChanged method:</p>
+<pre><code>public void onDecoderConfidenceChanged(DecoderConfidence confidence)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence));
+}</code></pre>
+Again, the Heartbeat Engine Example app simply passes the confidence information to the main UI thread, so that the UI can be updated with the new value.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Event%20Engine%20Example%20Project.html">Prev</a>
+</li><li>
+<a href="Transition-ExampleApp.html">Next</a>
+</li></ul></div>
+</body>
+</html>

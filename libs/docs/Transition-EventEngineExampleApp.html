@@ -1,0 +1,538 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Transition-ExampleApp.html">Prev</a>
+</li><li>
+<a href="Intrasonics%20Decoder%20Plugin%20Integration.html">Next</a>
+</li></ul></div>
+<h1 id="transitioning-from-the-original-sdk-to-sdk-2">Transitioning from the original SDK to SDK 2</h1>
+<h2 id="event-engine-example-app">Event Engine example app</h2>
+<p>This page contains a description of how to transition an existing Event Engine app from the original Intrasonics Decoder Library to SDK 2, using the code in the Event Engine example app as a guide.</p>
+<p>Besides including the new Decoder SDK in your project and removing the original, changes are required in the following places:</p>
+<ul>
+<li><a href="#Class%20imports">Class imports</a></li>
+<li><a href="#Implemented%20interfaces">Implemented interfaces</a></li>
+<li><a href="#Setting%20up%20and%20starting%20the%20decoder">Setting up and starting the decoder</a></li>
+<li><a href="#Disconnecting%20from%20and%20stopping%20the%20decoder">Disconnecting from and stopping the decoder</a></li>
+<li><a href="#Entering%20the%20background">Entering the background (onPause)</a></li>
+<li><a href="#Returning%20to%20the%20foreground">Returning to the foreground (onResume)</a></li>
+<li><a href="#Decoder%20listener%20methods">Decoder listener methods</a></li>
+<li><a href="#Handling%20decoder%20confidence%20updates">Handling decoder confidence updates</a></li>
+<li><a href="#User%20interface%20updates">User interface updates</a></li>
+<li><a href="#Reading%20a%20token%20from%20a%20file">Reading a token from a file</a></li>
+</ul>
+<h4 id="class-imports"><a name="Class imports"/></a><strong>Class imports</strong></h4>
+<h5 id="original-decoder-library"><em>Original Decoder Library</em></h5>
+<pre><code>import com.intrasonics.decoderlibrary.IntrasonicsDecoder;
+import com.intrasonics.decoderlibrary.IntrasonicsDecoder.*;
+import com.intrasonics.decoderlibrary.IntrasonicsDecoder.IntrasonicsDecoderEvent.IntrasonicsDecoderEventType;</code></pre>
+<h5 id="sdk-2-decoder-library"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>import com.intrasonics.Decoder;
+import com.intrasonics.DecoderConfidence;
+import com.intrasonics.DecoderListener;
+import com.intrasonics.eventengineexample.R;
+import com.intrasonics.eventengine.EventEngineEvent;
+import com.intrasonics.eventengine.EventEngineResponse;
+import com.intrasonics.eventengine.IEventEngine;
+import com.intrasonics.eventengine.IEventEngineListener;
+import com.intrasonics.eventengine.ResponseOK;</code></pre>
+<h4 id="implemented-interfaces"><a name="Implemented interfaces"/></a><strong>Implemented interfaces</strong></h4>
+<h5 id="original-decoder-library-1"><em>Original Decoder Library</em></h5>
+<pre><code>public class EventEngineExample extends Activity implements IntrasonicsDecoderErrorListener, IntrasonicsDecoderEventListener{}</code></pre>
+<h5 id="sdk-2-decoder-library-1"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>public class EventEngineExample extends Activity implements DecoderListener, IEventEngineListener{}</code></pre>
+<h4 id="setting-up-and-starting-the-decoder"><a name="Setting up and starting the decoder"/></a><strong>Setting up and starting the decoder</strong></h4>
+<h5 id="original-decoder-library-2"><em>Original Decoder Library</em></h5>
+<pre><code>/**
+ * Intrasonics Decoder
+ * 
+ * Get a reference to the Intrasonics Decoder singleton, and register this object
+ * as the listener for decoder errors and events.
+ */
+intrasonicsDecoder = IntrasonicsDecoder.sharedIntrasonicsDecoder;
+intrasonicsDecoder.intrasonicsDecoderRegisterErrorCallbackHandler(this);
+intrasonicsDecoder.intrasonicsDecoderRegisterEventCallbackHandler(this);
+
+/**
+ * Intrasonics Decoder
+ * 
+ * For this app, start the decoder immediately
+ */
+IntrasonicsDecoderReturnValue result = intrasonicsDecoder.intrasonicsDecoderStart();
+if (result != IntrasonicsDecoderReturnValue.ID_OK &amp;&amp; result != IntrasonicsDecoderReturnValue.ID_DECODING)
+{
+    String errText = sdf.format(new Date()) + &quot; Failed to start decoder, error &quot; + result;
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeGeneral, errText));
+}
+
+/**
+ * Intrasonics Decoder
+ * 
+ * Update the UI with the current decoder confidence
+ */
+updateDecoderConfidence(intrasonicsDecoder.intrasonicsDecoderGetConfidence());</code></pre>
+<h5 id="sdk-2-decoder-library-2"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>// Get a reference to the Intrasonics Decoder
+mDecoder = Decoder.getInstance();
+
+// Pass the application context into the decoder
+mDecoder.setApplicationContext(getApplicationContext());
+
+// Register as a decoder listener
+mDecoder.registerListener(this);
+
+try
+{
+    // Read in a licence token and pass it to the decoder
+    // mTokenFileName class member with the token name: private String mTokenFileName = &quot;Token.json&quot;;
+    mDecoder.setToken(readTokenFromFile(mTokenFileName));
+}
+catch (Exception ex)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeFailed, ex.getMessage()));
+}
+
+// Connect to the Event Engine and register some test events using JSON
+eventEngine = (IEventEngine)mDecoder.connectEngineListener(this, IEventEngine.class);
+    
+if (eventEngine != null)
+{
+    EventEngineResponse result = eventEngine.registerEventSequence(31739,
+            &quot;{\&quot;events\&quot;:[&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-1\&quot;,\&quot;time\&quot;:45.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-2\&quot;,\&quot;time\&quot;:89.40},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-3\&quot;,\&quot;time\&quot;:90.40},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-4\&quot;,\&quot;time\&quot;:91.40},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-5\&quot;,\&quot;time\&quot;:92.40},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-6\&quot;,\&quot;time\&quot;:100.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-7\&quot;,\&quot;time\&quot;:103.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-8\&quot;,\&quot;time\&quot;:109.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-9\&quot;,\&quot;time\&quot;:139.50},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-10\&quot;,\&quot;time\&quot;:157.80},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-11\&quot;,\&quot;time\&quot;:172.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-12\&quot;,\&quot;time\&quot;:186.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-13\&quot;,\&quot;time\&quot;:194.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-14\&quot;,\&quot;time\&quot;:221.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-15\&quot;,\&quot;time\&quot;:246.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-16\&quot;,\&quot;time\&quot;:252.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-17\&quot;,\&quot;time\&quot;:267.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-18\&quot;,\&quot;time\&quot;:279.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-19\&quot;,\&quot;time\&quot;:340.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-20\&quot;,\&quot;time\&quot;:373.00},&quot; +
+                    &quot;{\&quot;id\&quot;:\&quot;STS-132-Event-21\&quot;,\&quot;time\&quot;:407.60}&quot; +
+            &quot;]}&quot;,
+            30);
+    if (!(result instanceof ResponseOK))
+    {
+        uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeFailed, result.description));
+    }
+}
+else
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeFailed, &quot;Failed to connect to Event Engine&quot;));
+}
+    
+// Update the UI with the default decoder confidence
+updateDecoderConfidence(DecoderConfidence.Invalid);
+
+// Start the decoder
+mDecoder.startDecoding();</code></pre>
+<blockquote>
+<p><strong>Note:</strong> The new version of the example passes events into the Decoder Library as a string before starting the decoder. This has changed from the original SDK, where a file reference was passed to the Decoder Library, only when it was required.</p>
+</blockquote>
+<h4 id="disconnecting-from-and-stopping-the-decoder"><a name="Disconnecting from and stopping the decoder"/></a><strong>Disconnecting from and stopping the decoder</strong></h4>
+<h5 id="original-decoder-library-3"><em>Original Decoder Library</em></h5>
+<pre><code>/**
+ * Intrasonics Decoder
+ * 
+ * Unregister this object as the listener for decoder errors and events,
+ * and stop the decoder.
+ */
+intrasonicsDecoder.intrasonicsDecoderUnregisterErrorCallbackHandler(this);
+intrasonicsDecoder.intrasonicsDecoderUnregisterEventCallbackHandler(this);
+intrasonicsDecoder.intrasonicsDecoderStop();</code></pre>
+<h5 id="sdk-2-decoder-library-3"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>// Unregister this object as the listener for the Event Engine
+if (eventEngine != null)
+{
+    mDecoder.disconnectFromEngine(this, eventEngine);
+}
+
+// Stop the decoder.
+mDecoder.stopDecoding();
+
+// Unregister as a decoder listener
+mDecoder.unRegisterListener(this);
+
+mDecoder = null;</code></pre>
+<h4 id="entering-the-background-onpause"><a name="Entering the background"/></a><strong>Entering the background (onPause)</strong></h4>
+<h5 id="original-decoder-library-4"><em>Original Decoder Library</em></h5>
+<pre><code>/**
+ * Intrasonics Decoder
+ * 
+ * Unregister this object as the listener for decoder errors and events,
+ * and stop the decoder.
+ */
+intrasonicsDecoder.intrasonicsDecoderUnregisterErrorCallbackHandler(this);
+intrasonicsDecoder.intrasonicsDecoderUnregisterEventCallbackHandler(this);
+intrasonicsDecoder.intrasonicsDecoderStop();</code></pre>
+<h5 id="sdk-2-decoder-library-4"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>// Stop the decoder.
+mDecoder.stopDecoding();</code></pre>
+<h4 id="returning-to-the-foreground-onresume"><a name="Returning to the foreground"/></a><strong>Returning to the foreground (onResume)</strong></h4>
+<h5 id="original-decoder-library-5"><em>Original Decoder Library</em></h5>
+<pre><code>IntrasonicsDecoderReturnValue result = intrasonicsDecoder.intrasonicsDecoderStart();
+if (result != IntrasonicsDecoderReturnValue.ID_OK &amp;&amp; result != IntrasonicsDecoderReturnValue.ID_DECODING)
+{
+    String errText = sdf.format(new Date()) + &quot; Failed to start decoder, error &quot; + result;
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeGeneral, errText));
+}
+else
+{
+    intrasonicsDecoder.intrasonicsDecoderRegisterErrorCallbackHandler(this);
+    intrasonicsDecoder.intrasonicsDecoderRegisterEventCallbackHandler(this);
+}</code></pre>
+<h5 id="sdk-2-decoder-library-5"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>// Restart the decoder.
+mDecoder.startDecoding();</code></pre>
+<h4 id="decoder-listener-methods"><a name="Decoder listener methods"/></a><strong>Decoder listener methods</strong></h4>
+<h5 id="original-decoder-library-6"><em>Original Decoder Library</em></h5>
+<pre><code>/**
+ * Intrasonics Decoder
+ *
+ * Called when an event is generated by the Intrasonics decoder.
+ * 
+ * @param event The decoder event.
+ */
+public void onIntrasonicsDecoderEvent(IntrasonicsDecoderEvent event)
+{
+    Message msg = uiUpdateHandler.obtainMessage(msgTypeEvent, event);
+    uiUpdateHandler.sendMessage(msg);
+    
+    // Attempt to load the Event Engine with an event XML file for this event
+    if (event.eventType == IntrasonicsDecoderEventType.ID_EVENT)
+    {
+        try
+        {
+            InputStream is = getAssets().open(event.eventValue + &quot;.xml&quot;);
+            
+            // If there&#39;s no event file, an IOException will have been thrown by &#39;open&#39; above
+            intrasonicsDecoder.intrasonicsDecoderPrepareWithEventFile(is, 30);
+            is.close();
+        }
+        catch (Exception e) {}
+    }
+}
+
+/**
+ * Intrasonics Decoder
+ *
+ * Called when the Intrasonics decoder confidence changes.
+ * 
+ * @param confidence The new decoder confidence.
+ */
+public void onIntrasonicsDecoderConfidenceChange(IntrasonicsDecoderConfidence confidence)
+{
+    Message msg = uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence);
+    uiUpdateHandler.sendMessage(msg);
+}
+
+/**
+ * Intrasonics Decoder
+ *
+ * Called when an error has occurred within the Intrasonics decoder.
+ * 
+ * @param error The decoder error.
+ */
+public void onIntrasonicsDecoderError(IntrasonicsDecoderError error)
+{
+    Message msg = uiUpdateHandler.obtainMessage(msgTypeError, error);
+    uiUpdateHandler.sendMessage(msg);
+}</code></pre>
+<h5 id="sdk-2-decoder-library-6"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>/**
+ * IEventEngineListener method for handling an event generated by the Event Engine.
+ * 
+ * @param event The event received from the Event Engine
+ */
+public void onEventEngineEvent(EventEngineEvent event)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeEvent, event));
+}
+
+/**
+ * DecoderListener methods
+ */
+public void onDecoderFailed(String error, Date time)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeFailed, error));
+}
+
+public void onDecoderConfidenceChanged(DecoderConfidence confidence)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence));
+}
+
+public void onDecoderStartedListening()
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeMessage, &quot;Decoder started listening&quot;));
+}
+
+public void onDecoderIdle()
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeMessage, &quot;Decoder idle&quot;));
+}</code></pre>
+<h4 id="handling-decoder-confidence-updates"><a name="Handling decoder confidence updates"/></a><strong>Handling decoder confidence updates</strong></h4>
+<h5 id="original-decoder-library-7"><em>Original Decoder Library</em></h5>
+<pre><code>private void updateDecoderConfidence(IntrasonicsDecoderConfidence idc)
+{
+    if (idc == IntrasonicsDecoderConfidence.ID_CONFIDENCE_UNKNOWN)
+    {
+        confidenceText.setText(&quot;Unknown&quot;);
+
+        // Stop and remove animation
+        AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+        if (iAnimation != null &amp;&amp; iAnimation.isRunning())
+        {
+            iAnimation.stop();
+        }
+        confidenceImage.setBackgroundResource(0);
+    }
+    else
+    {
+        // Apply animation
+        switch (idc)
+        {
+            case ID_CONFIDENCE_HIGH:
+                confidenceText.setText(&quot;High&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_3);
+                break;
+            case ID_CONFIDENCE_MEDIUM:
+                confidenceText.setText(&quot;Medium&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_2);
+                break;
+            case ID_CONFIDENCE_LOW:
+                confidenceText.setText(&quot;Low&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_1);
+                break;
+            default:
+                confidenceText.setText(&quot;Unknown&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_1);
+                break;
+        }
+
+        // Start animation, if not already animating
+        AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+        if (!iAnimation.isRunning())
+        {
+            iAnimation.start();
+        }
+    }
+}</code></pre>
+<h5 id="sdk-2-decoder-library-7"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>private void updateDecoderConfidence(DecoderConfidence confidence)
+{
+    if (confidence != null)
+    {
+        if (confidence == DecoderConfidence.Invalid)
+        {
+            confidenceText.setText(&quot;Invalid&quot;);
+            
+            // Stop and remove the animation
+            AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+            if (iAnimation != null &amp;&amp; iAnimation.isRunning())
+            {
+                iAnimation.stop();
+            }
+            confidenceImage.setBackgroundResource(0);
+        }
+        else
+        {
+            // Apply animation
+            if (confidence == DecoderConfidence.High)
+            {
+                confidenceText.setText(&quot;High&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_3);
+            }
+            else if (confidence == DecoderConfidence.Medium)
+            {
+                confidenceText.setText(&quot;Medium&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_2);
+            }
+            else if (confidence == DecoderConfidence.Low)
+            {
+                confidenceText.setText(&quot;Low&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_1);
+            }
+            else
+            {
+                confidenceText.setText(&quot;Unknown&quot;);
+                confidenceImage.setBackgroundResource(R.anim.i_anim_1);
+            }
+
+            // Start the animation, if not already animating
+            AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+            if (iAnimation != null &amp;&amp; !iAnimation.isRunning())
+            {
+                iAnimation.start();
+            }
+        }
+    }
+}</code></pre>
+<h4 id="user-interface-updates"><a name="User interface updates"/></a><strong>User interface updates</strong></h4>
+<p>The Intrasonics Decoder runs in it's own thread, so if the UI is to be updated from a decoder event, the event must be passed to the UI thread by sending a message to a handler running within that thread.</p>
+<h5 id="original-decoder-library-8"><em>Original Decoder Library</em></h5>
+<pre><code>private Handler uiUpdateHandler = new Handler()
+{
+    public void handleMessage(Message msg)
+    {
+        if (msg.what == msgTypeConfidence)
+        {
+            updateDecoderConfidence((IntrasonicsDecoderConfidence)msg.obj);
+        }
+        else
+        {
+            String newLine;
+
+            switch (msg.what)
+            {
+                case msgTypeGeneral:
+                    newLine = (String)msg.obj;
+                    break;
+                
+                case msgTypeEvent:
+                    IntrasonicsDecoderEvent event = (IntrasonicsDecoderEvent)msg.obj;
+                    newLine = sdf.format(event.eventTimestamp) + &quot; Event: &quot; + event.eventType;
+                    if (event.eventValue != null)
+                    {
+                        newLine += &quot;, &quot; + event.eventValue;
+                    }
+                    break;
+
+                case msgTypeError:
+                    IntrasonicsDecoderError error = (IntrasonicsDecoderError)msg.obj;
+                    newLine = sdf.format(error.errorTimestamp) + &quot; Error: &quot; + error.errorCode + &quot;, &quot; + error.errorDescription;
+                    break;
+
+                default:
+                    newLine = &quot;&quot;;
+            }
+
+            String newText = newLine + &quot;\n&quot; + textView.getText().toString();
+            textView.setText(newText);
+        }
+    }
+};</code></pre>
+<h5 id="sdk-2-decoder-library-8"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>private Handler uiUpdateHandler = new Handler()
+{
+    public void handleMessage(Message msg)
+    {
+        String newText = &quot;&quot;;
+
+        switch (msg.what)
+        {
+        case msgTypeMessage:
+        {
+            newText = sdf.format(new Date()) + &quot; &quot; + (String)msg.obj;
+            newText += &quot;\n&quot; + textView.getText().toString();
+            textView.setText(newText);
+            break;
+        }
+        case msgTypeEvent:
+        {
+            EventEngineEvent event = (EventEngineEvent)msg.obj;
+            newText = sdf.format(new Date(event.timestamp)) + &quot; Event : &quot; + event.getClass().getSimpleName();
+            if (event.id != null)
+            {
+                newText += &quot;, &quot; + event.id;
+            }
+            newText += &quot;\n&quot; + textView.getText().toString();
+            textView.setText(newText);
+            break;
+        }
+        case msgTypeConfidence:
+        {
+            updateDecoderConfidence((DecoderConfidence)msg.obj);
+            break;
+        }
+        case msgTypeFailed:
+        {
+            newText = &quot;Error : &quot;+ (String)msg.obj + &quot;\n&quot; + textView.getText().toString();
+            textView.setText(newText);
+            Toast.makeText(EventEngineExample.this, &quot;Error : &quot;+ (String)msg.obj, Toast.LENGTH_SHORT).show();
+            break;
+        }
+        default:
+            break;
+        }
+    }
+};</code></pre>
+<h4 id="reading-a-token-from-a-file"><a name="Reading a token from a file"></a><strong>Reading a token from a file</strong></h4>
+<p>SDK 2 introduces tokens, which the example app reads from a bundled file. The following method simply reads the contents of a token file into a String. It's not special, but is provided for completeness.</p>
+<h5 id="sdk-2-decoder-library-9"><em>SDK 2 Decoder Library</em></h5>
+<pre><code>/**
+ * Read a token file into a string, ready for passing to the decoder.
+ * 
+ * @param fileName The name of the file containing the token data
+ * 
+ * @return A String holding the contents of the specified file
+ * 
+ * @throws IOException Upon failure to open and read the file
+ */
+public String readTokenFromFile(String fileName) throws IOException  
+{  
+    String token = &quot;empty&quot;;
+
+    try
+    {
+        InputStream iS = getResources().getAssets().open(fileName);   
+
+        byte[] buffer = new byte[iS.available()];    
+        iS.read(buffer);  
+
+        ByteArrayOutputStream oS = new ByteArrayOutputStream();  
+
+        oS.write(buffer);  
+        token = oS.toString();
+        oS.close();  
+        iS.close(); 
+    }
+    catch (IOException e)
+    {
+        Log.d(tag, &quot;Failed to open token file: &quot; + e.getMessage());
+    }
+    return token; 
+}</code></pre>
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Transition-ExampleApp.html">Prev</a>
+</li><li>
+<a href="Intrasonics%20Decoder%20Plugin%20Integration.html">Next</a>
+</li></ul></div>
+</body>
+</html>

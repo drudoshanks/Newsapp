@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Decoder%20Confidence.html">Prev</a>
+</li><li>
+<a href="Event%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+<h1 id="trigger-engine-example-project">Trigger Engine Example Project</h1>
+<p>The Trigger Engine is the simplest Engine. It simply propagates any Intrasonics codewords received (provided they are authorised by a valid token) to the Engine listener.</p>
+<p>Included with the SDK Decoder Library is an example app that uses the Trigger Engine, called <strong>Example</strong>. Feel free to examine the app’s source code to aid your understanding of how to integrate the Intrasonics Decoder and Trigger Engine into your app. You may copy any useful code into your own project.</p>
+<h2 id="building-and-running-the-trigger-engine-example">Building and Running the Trigger Engine Example</h2>
+<p>After unzipping the Trigger Engine example app zip file <strong>Example.zip</strong>, import the project into Eclipse. From the <code>File</code> menu, select <code>Import...</code>, then open the <code>General</code> category and select <code>Existing Projects into Workspace</code>. Follow the prompts to import the project.</p>
+<p>You should now be able to build and run the app on an Android device.</p>
+<p>If you need guidance on building and running Android applications, refer to the Android Developer’s Guide, at <a href="http://developer.android.com/guide" target="developer.android.com.guide">http://developer.android.com/guide</a>, specifically the section on <strong>Building and Running</strong>: <a href="http://developer.android.com/guide/developing/building" target="developer.android.com.guide.building">http://developer.android.com/guide/developing/building</a>.</p>
+<p>This example app connects to the Trigger Engine, and can be tested with the <strong>Little_Rock_Star.wav</strong> and <strong>Lonely_Road.wav</strong> sample tracks, available from the <a href="https://portal.intrasonics.com/resources/12" target="portal.resource.12">Developer Portal</a>. Playing these audio files to the running example app should result in the following output to the screen:</p>
+<center>
+<img alt="Trigger Engine example app output" src="images/ExampleApp.png" width="320" />
+</center>
+
+<h2 id="notes-on-the-app-code">Notes on the App Code</h2>
+<p>The following fragments of code correspond to the steps outlined in <strong>Using the Intrasonics Decoder</strong> in <a href="Decoder%20Basics.html">Decoder Basics</a>:</p>
+<p><strong>1. Instantiate the Decoder singleton</strong></p>
+<p>This is a single line of code, to instantiate (if not instantiated before) and get a reference to the Decoder singleton:</p>
+<pre><code>Decoder mDecoder = Decoder.getInstance();</code></pre>
+<p><strong>2. Pass the Application Context to the Decoder</strong></p>
+<pre><code>mDecoder.setApplicationContext(getApplicationContext());</code></pre>
+<p><strong>3. Register as a Decoder listener</strong></p>
+<p>The Example app's main Activity class implements the <code>DecoderListener</code> interface, allowing it to receive state change, failure and confidence messages (see <a href="com/intrasonics/DecoderListener.html">DecoderListener</a>) by registering as a Decoder listener:</p>
+<pre><code>mDecoder.registerListener(this);</code></pre>
+<p><strong>4. Pass a token to the Decoder</strong></p>
+<p>The app reads a Decoder token from a file and passes it to the Decoder. This is the simplest behaviour, but as the Decoder expects the token in a Java String, it should be quite simple to implement other approaches, such as downloading from a web server.</p>
+<pre><code>private String mTokenFileName = &quot;Token.json&quot;;
+    .
+    .
+mDecoder.setToken(readTokenFromFile(mTokenFileName));
+    .
+    .
+/**
+ * Read a token file into a string, ready for passing to the decoder.
+ * 
+ * @param fileName The name of the file containing the token data
+ * 
+ * @return A String holding the contents of the specified file
+ * 
+ * @throws IOException Upon failure to open and read the file
+ */
+public String readTokenFromFile(String fileName) throws IOException
+{
+    .
+    .
+}</code></pre>
+<p><strong>5. Connect as an Engine listener</strong></p>
+<p>The Example app's main Activity class implements the <code>ITriggerEngineListener</code> interface, allowing it to receive codewords from the Trigger Engine via the <code>onCodewordReceived()</code> method by connecting to the Trigger Engine:</p>
+<pre><code>ITriggerEngine triggerEngine = (ITriggerEngine)mDecoder.connectToEngine(this, ITriggerEngine.class);</code></pre>
+<p><strong>7. Start the Decoder</strong></p>
+<p>Finally, the Decoder is started.</p>
+<pre><code>mDecoder.startDecoding();</code></pre>
+<h2 id="decoding-audio">Decoding Audio</h2>
+<p>When Intrasonics-encoded content is subsequently played to the Example app, provided it contains codewords that are authorised for the Trigger Engine by the licence token, the app will receive the codeword and a timestamp for when it was received through the <code>onCodewordReceived</code> method:</p>
+<pre><code>/**
+ * ITriggerEngineListener method for handling a codeword
+ * 
+ * @param codeword The codeword and timestamp received from the decoder
+ */
+public void onCodewordReceived(Codeword codeword)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeCodeword, codeword));
+}</code></pre>
+<p>The Example app simply passes the codeword data to the main UI thread, so that it can displayed on the app's UI.</p>
+<p>The Decoder will also inform the app of changes in confidence, to reflect how sure it is that it is receiving Intrasonics-encoded audio, through the <code>onDecoderConfidenceChanged</code> method:</p>
+<pre><code>public void onDecoderConfidenceChanged(DecoderConfidence confidence)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence));
+}</code></pre>
+Again, the Example app simply passes the confidence information to the main UI thread, so that the UI can be updated with the new value.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Decoder%20Confidence.html">Prev</a>
+</li><li>
+<a href="Event%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+</body>
+</html>

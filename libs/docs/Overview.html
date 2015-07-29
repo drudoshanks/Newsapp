@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<h1 id="overview">Overview</h1>
+<p>The Intrasonics Decoder Library provides decoding functionality and a simple API, to allow applications to decode Intrasonics-encoded audio and receive events based on the data within it.</p>
+<p>These pages describe the Android Intrasonics Decoder Library, and explain how to use it to enable decoding within Android applications.</p>
+<p>This guide assumes that the reader is an experienced Android developer, and there is therefore no explanation of the fundamentals of how to create and build an Android project within Eclipse or Android Studio, or how to run the resulting app on an Android device.</p>
+<p>All descriptions and examples are based on Eclipse Kepler, which is freely available for all major hardware platforms from <a href="https://www.eclipse.org" target="eclipse.org">https://www.eclipse.org</a>. The Android Developer Toolkit (ADT), which enables Android velopment within Eclipse, is available from <a href="http://developer.android.com/tools/help/adt.html" target="android.adt">http://developer.android.com/tools/help/adt.html</a>.</p>
+<p>The Android Decoder Library distribution consists of a native &quot;shared object&quot; (a <code>.so</code> file), a jar library, and documentation that can all be dropped into an existing Android project. Functionally, the Decoder Library comprises a core decoder and a set of engines that provide behaviours for specific use cases. The set of engines and range of codewords are licensed with an encrypted token provided by Intrasonics, and available from the <a href="https://portal.intrasonics.com" target="portal">Intrasonics Developer Portal</a>.</p>
+<p>If the token is configured to automatically update itself, the Decoder Library will periodically contact an Intrasonics server to check whether a newer replacement token is available. This check is based on the app identifier, which must be registered with the <a href="https://portal.intrasonics.com" target="portal">Intrasonics Developer Portal</a> to enable automatic updates for that app. If a new token is available, the Decoder Library will download and install it.</p>
+<p>To accompany the Decoder Library, a set of example apps are also available from the <a href="https://portal.intrasonics.com" target="portal">Intrasonics Developer Portal</a> to show the basic functionality and an example use of the various engines, as well as pre-encoded content that works with the example apps.</p>
+<h2 id="decoder-library-documentation">Decoder Library Documentation</h2>
+<ul>
+<li><a href="Getting%20Started.html">Getting Started</a></li>
+<li><a href="Decoder%20Basics.html">Decoder Basics</a></li>
+<li><a href="Decoder%20Confidence.html">Decoder Confidence</a></li>
+<li><a href="Trigger%20Engine%20Example%20Project.html">Trigger Engine Example Project</a></li>
+<li><a href="Event%20Engine%20Example%20Project.html">Event Engine Example Project</a></li>
+<li><a href="Heartbeat%20Engine%20Example%20Project.html">Heartbeat Engine Example Project</a></li>
+<li><a href="Transition-ExampleApp.html">Transition Example App to SDK 2</a></li>
+<li><a href="Transition-EventEngineExampleApp.html">Transition Event Engine Example App to SDK 2</a></li>
+</ul>
+<h2 id="decoder-plugins-advanced-developers-only">Decoder Plugins (Advanced Developers Only)</h2>
+<p>The Decoder Library employs a plugin architecture to allow decoding functionality to be extended.</p>
+<p><strong>Plugin development is for advanced developers only; in general, the standard SDK is expected to provide all the functionality that might be required.</strong></p>
+<p>The following pages describe the plugin architecture, and how to develop a plugin for the Decoder Library.</p>
+<ul>
+<li><a href="Intrasonics%20Decoder%20Plugin%20Integration.html">Intrasonics Decoder Plugin Integration</a></li>
+<li><a href="How%20to%20Build%20&amp;%20Test%20a%20Decoder%20Plugin.html">How to Build &amp; Test a Decoder Plugin</a></li>
+<li><a href="Plugin%20Engine%20Example%20Project.html">Plugin Engine Example Project</a></li>
+<li><a href="pluginSDK/html/namespaceintrasonics.html" target="plugin.sdk.reference">Intrasonics Plugin SDK Reference</a></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="How%20to%20Build%20&%20Test%20a%20Decoder%20Plugin.html">Prev</a>
+</li><li>
+<span class="disableda">Next</span>
+</li></ul></div>
+<h1 id="plugin-engine-example-project">Plugin Engine Example Project</h1>
+<p>The Plugin Engine simply passes up data received from a plug-in provided by the App developer. It propagates any data received (provided they are authorised by a valid token) to the Engine listener.</p>
+<p>Included with the SDK Decoder Library is an example app that uses the Plugin Engine, called <strong>PluginExample</strong>. Feel free to examine the app’s source code to aid your understanding of how to integrate the Intrasonics Decoder and Plugin Engine into your app. You may copy any useful code into your own project.</p>
+<h2 id="building-and-running-the-plugin-engine-example">Building and Running the Plugin Engine Example</h2>
+<p>After unzipping the Plugin Engine example app zip file <strong>PluginEngineExample.zip</strong>, import the project into Eclipse. From the <code>File</code> menu, select <code>Import...</code>, then open the <code>General</code> category and select <code>Existing Projects into Workspace</code>. Follow the prompts to import the project.</p>
+<p>You should now be able to build and run the app on an Android device.</p>
+<p>If you need guidance on building and running Android applications, refer to the Android Developer’s Guide, at <a href="http://developer.android.com/guide" target="developer.android.com.guide">http://developer.android.com/guide</a>, specifically the section on <strong>Building and Running</strong>: <a href="http://developer.android.com/guide/developing/building" target="developer.android.com.guide.building">http://developer.android.com/guide/developing/building</a>.</p>
+<center>
+<img alt="Plugin Engine example app output" src="images/ExamplePluginApp.png" width="320" />
+</center>
+
+<h2 id="notes-on-the-app-code">Notes on the App Code</h2>
+<p>The following fragments of code correspond to the steps outlined in <strong>Using the Intrasonics Decoder</strong> in <a href="Decoder%20Basics.html">Decoder Basics</a>:</p>
+<p><strong>1. Instantiate the Decoder singleton</strong></p>
+<p>This is a single line of code, to instantiate (if not instantiated before) and get a reference to the Decoder singleton:</p>
+<pre><code>Decoder mDecoder = Decoder.getInstance();</code></pre>
+<p><strong>2. Pass the Application Context to the Decoder</strong></p>
+<pre><code>mDecoder.setApplicationContext(getApplicationContext());</code></pre>
+<p><strong>3. Register as a Decoder listener</strong></p>
+<p>The PluginExample app's main Activity class implements the <code>DecoderListener</code> interface, allowing it to receive state change, failure and confidence messages (see <a href="com/intrasonics/DecoderListener.html">DecoderListener</a>) by registering as a Decoder listener:</p>
+<pre><code>mDecoder.registerListener(this);</code></pre>
+<p><strong>4. Pass a token to the Decoder</strong></p>
+<p>The app reads a Decoder token from a file and passes it to the Decoder. This is the simplest behaviour, but as the Decoder expects the token in a Java String, it should be quite straightforward to implement other approaches, such as downloading from a web server.</p>
+<pre><code>private String mTokenFileName = &quot;Token.json&quot;;
+    .
+    .
+mDecoder.setToken(readTokenFromFile(mTokenFileName));
+    .
+    .
+/**
+ * Read a token file into a string, ready for passing to the decoder.
+ * 
+ * @param fileName The name of the file containing the token data
+ * 
+ * @return A String holding the contents of the specified file
+ * 
+ * @throws IOException Upon failure to open and read the file
+ */
+public String readTokenFromFile(String fileName) throws IOException
+{
+    .
+    .
+}</code></pre>
+<p><strong>Note:</strong> <em>In order to use the Plugin Engine, a token that explicitly allows it is required (evaluation SDK tokens do <strong>not</strong> allow the Plugin Engine). Please contact Intrasonics for a Plugin Engine-compatible token.</em></p>
+<p><strong>5. Retrieve the plugin file path from the framework</strong></p>
+<p>This allows the developer to put any files that the plugin might need into the appropriate folder;</p>
+<pre><code>String pluginPath = mDecoder.getFilePathForPlugin(&quot;intrasonics_TestPlugin&quot;);</code></pre>
+<p><strong>6. Connect as an Engine listener</strong></p>
+<p>The PluginExample app's main Activity class implements the <code>IPluginEngineListener</code> interface, allowing it to receive codewords from the Plugin Engine via the <code>onDataReceived()</code> method:</p>
+<pre><code>IPluginEngine pluginEngine = (IPluginEngine)mDecoder.connectToEngine(this, IPluginEngine.class);</code></pre>
+<p><strong>7. Configure the plugin</strong></p>
+<p>If the plugins loaded by the Decoder needs configuration, a map of key value pairs can be passed to the Decoder to be forwarded to the plugin;</p>
+<pre><code>IConfigurationParameter truth = new ConfigurationParameter&lt;Boolean&gt;(&quot;intrasonics_TestPlugin_truth&quot;, true) {};
+IConfigurationParameter meaning = new ConfigurationParameter&lt;Integer&gt;(&quot;intrasonics_TestPlugin_meaning&quot;, 42) {};
+IConfigurationParameter pi = new ConfigurationParameter&lt;Double&gt;(&quot;intrasonics_TestPlugin_pi&quot;, 3.14159) {};
+IConfigurationParameter big = new ConfigurationParameter&lt;Long&gt;(&quot;intrasonics_TestPlugin_big&quot;, 9223372036854775800L) {};
+IConfigurationParameter message = new ConfigurationParameter&lt;String&gt;(&quot;intrasonics_TestPlugin_message&quot;, &quot;hello world&quot;) {};
+
+Map&lt;String, IConfigurationParameter&gt; configuration = new LinkedHashMap&lt;String, IConfigurationParameter&gt;();
+
+configuration.put(truth.getName(), truth);
+configuration.put(meaning.getName(), meaning);
+configuration.put(pi.getName(), pi);
+configuration.put(big.getName(), big);
+configuration.put(message.getName(), message);
+
+mDecoder.configure(configuration);</code></pre>
+<p>The keys for data passed to the plugin needs to be prefixed by the namespace and class name of the plugin, so for the Intrasonics Test Plugin, this prefix is: intrasonics_TestPlugin_. Currently primitive boolean, integer, double, long long values and strings can be passed down. Other types will not be translated or passed to the C++ layer.</p>
+<p><strong>8. Start the Decoder</strong></p>
+<p>Finally, the Decoder is started.</p>
+<pre><code>mDecoder.startDecoding();</code></pre>
+<h2 id="decoding-audio">Decoding Audio</h2>
+<p>When content that can trigger a Plugin event is subsequently played to the Plugin Example app, the app will receive a map of the information through the <code>onDataReceived</code> method:</p>
+<pre><code>/**
+ * Called when data is received from a plugin.
+ *
+ * @param data The received data
+ */
+public void onDataReceived(Map&lt;String, IEventParamsObject&gt; data)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeDataReceived, data));
+}</code></pre>
+<p>The Plugin Engine Example app simply passes the data to the main UI thread, so that it can displayed on the app's UI.</p>
+<p>The Decoder will also inform the app of changes in confidence, to reflect how sure it is that it is receiving Intrasonics-encoded audio, through the onDecoderConfidenceChanged method:</p>
+<pre><code>public void onDecoderConfidenceChanged(DecoderConfidence confidence)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence));
+}</code></pre>
+Again, the Plugin Engine Example app simply passes the confidence information to the main UI thread, so that the UI can be updated with the new value.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="How%20to%20Build%20&%20Test%20a%20Decoder%20Plugin.html">Prev</a>
+</li><li>
+<span class="disableda">Next</span>
+</li></ul></div>
+</body>
+</html>

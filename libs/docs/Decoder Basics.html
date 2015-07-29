@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Getting%20Started.html">Prev</a>
+</li><li>
+<a href="Decoder%20Confidence.html">Next</a>
+</li></ul></div>
+<h1 id="decoder-basics">Decoder Basics</h1>
+<p>This page describes the contents of the Android Decoder Library zip file, and provides further details on how the Decoder works. A general understanding of this will help when integrating the Decoder into a project.</p>
+<h2 id="contents-of-the-library">Contents of the Library</h2>
+<p>The Android Decoder Library consists of the following files, arranged in a folder structure that's ready for importing directly into an Eclipse project (see <a href="Getting%20Started.html">Getting Started</a> for how to do this):</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">File path</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">libs/IntrasonicsDecoder.jar</td>
+<td align="left">This contains the Java classes that are required to access the functionality of the low-level shared objects, providing access to the Decoder and Engines, and allowing events to be received by the app.</td>
+</tr>
+<tr class="even">
+<td align="left">libs/*/libAudioDecoder.so</td>
+<td align="left">The shared objects that contain the Decoder and Engines are contained inside architecture-specific folders. There will normally be 4 folders, named <code>armeabi</code>, <code>armeabi-v71</code>, <code>mips</code> and <code>x86</code>. These will all be built into any app that uses the Decoder Library, allowing the app and Decoder to be run on any current Android hardware platform.</td>
+</tr>
+<tr class="odd">
+<td align="left">libs/docs</td>
+<td align="left">This folder contains the API documentation for the Decoder classes. The properties file mentioned below allows Eclipse to use the API documentation in its code editor to provide Javadoc help, tooltips, and automatic code completion.</td>
+</tr>
+<tr class="even">
+<td align="left">libs/IntrasonicsDecoder.jar.properties</td>
+<td align="left">This properties file links the classes in the IntrasonicsDecoder.jar with the API documents in <code>libs/docs</code>.</td>
+</tr>
+<tr class="odd">
+<td align="left">res/drawable/*.png<br />res/anim/i_anim_*.xml</td>
+<td align="left">This folder contains Intrasonics' standard set of Decoder confidence images, and predefined animations for the images. See the <a href="Decoder%20Confidence.html">Decoder Confidence</a> section for information on how to include and use these in a project.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="using-the-intrasonics-decoder">Using the Intrasonics Decoder</h2>
+<p>In normal use, the flow of actions to set up and start the Decoder are as follows:</p>
+<center>
+<img alt="Decoder startup flows into project" src="images/decoder basics 00.png" width="240" />
+</center>
+
+<p>See the <a href="overview-summary.html">API Documentation</a> and example projects (<a href="Trigger%20Engine%20Example%20Project.html">Trigger Engine</a>, <a href="Event%20Engine%20Example%20Project.html">Event Engine</a> or <a href="Heartbeat%20Engine%20Example%20Project.html">Heartbeat Engine</a>) for details and examples of performing each of the steps described.</p>
+Once steps 1 to 4 have been completed, the decoder may be started and stopped as required, but unless a connection to one of the Engines has been made (step 5), it won't really do anything useful except for reporting confidence (see <a href="Decoder%20Confidence.html">Decoder Confidence</a>).
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Getting%20Started.html">Prev</a>
+</li><li>
+<a href="Decoder%20Confidence.html">Next</a>
+</li></ul></div>
+</body>
+</html>

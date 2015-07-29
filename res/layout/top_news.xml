@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <eu.erikw.PullToRefreshListView
+        android:id="@+id/to_news_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@null"
+        android:listSelector="@android:color/transparent"
+        android:scrollbars="none"
+        android:background="@drawable/red_back"  >
+    </eu.erikw.PullToRefreshListView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ProgressBar
+            android:visibility="gone"
+            android:id="@+id/list_refresh_progressbar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+</FrameLayout>

@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="overview-summary.html">Prev</a>
+</li><li>
+<a href="Decoder%20Basics.html">Next</a>
+</li></ul></div>
+<h1 id="getting-started">Getting Started</h1>
+<p>To get started with the Intrasonics Decoder, you can either use this guide to <a href="#add">add decoding to an existing project</a>, or open one of the included example projects that's most relevant to your particular need of the Decoder:</p>
+<h2 id="trigger-engine-example-project">Trigger Engine Example Project</h2>
+<p>The Trigger Engine is the simplest engine provided. It simply propagates codewords received from encoded audio to the engine listener.</p>
+<p>Further details, and an example project that uses the Trigger Engine, can be found <a href="Trigger%20Engine%20Example%20Project.html">here</a></p>
+<h2 id="event-engine-example-project">Event Engine Example Project</h2>
+<p>The Event Engine is slightly more complex than the Trigger Engine. It accurately synchronises with audio tracks that have been encoded with Event Engine codewords, and then generates events at exact times relative to the start of the encoded audio.</p>
+<p>Further details, and an example project that uses the Event Engine, can be found <a href="Event%20Engine%20Example%20Project.html">here</a></p>
+<h2 id="heartbeat-engine-example-project">Heartbeat Engine Example project</h2>
+<p>The third engine is the Heartbeat Engine. This interprets continuous codewords that are inserted in real-time into broadcast audio, and reports to the engine listener a periodic event detailing the absolute time within the audio, based on the date and time of the original broadcast.</p>
+<p>Further details, and an example project that uses the Heartbeat Engine, can be found <a href="Heartbeat%20Engine%20Example%20Project.html">here</a></p>
+<h2 id="adding-the-intrasonics-decoder-to-an-existing-eclipse-project"><a name="add"></a>Adding the Intrasonics Decoder to an Existing Eclipse Project</h2>
+<p>To add the DecoderLibrary to an Eclipse project, and make decoding functionality available to that project, perform the following steps.</p>
+<p><em>Note that screenshots below are from Eclipse running on a Mac, but the instructions will apply equally to other platforms.</em></p>
+<p>Unzip the decoder library zip file IntrasonicsDecoder.zip to reveal the binary shared object, jar file and documentation within. These are unzipped into folder called <code>libs</code>, which corresponds to the <code>libs</code> folder in an Android project.</p>
+<p>Inside the extracted <code>libs</code> folder will be the <code>IntrasonicsDecoder.jar</code> file, sub-folders containing shared objects for different architectures, and a <code>docs</code> folder containing embedded API documentation for Eclipse. The API documentation can also be found on-line <a href="https:/portal.intrasonics.com/docs/SDK2/android/Current" target="portal.docs.sdk2.android.current">here</a>.</p>
+<p>Drag the extracted <code>libs</code> folder onto your project in Eclipse, as shown below.</p>
+<center>
+<img alt="Drag libs into project" src="images/getting started 00.png" width="280" style="margin:15px;" />
+</center>
+
+<p>When prompted, select to copy files and folders into the project:</p>
+<center>
+<img alt="Copy dragged files into project" src="images/getting started 01.png" width="450" style="margin:15px;" />
+</center>
+
+<p>Finally, if <code>libs</code> already exists, you'll be asked if you want to overwrite it:</p>
+<center>
+<img alt="Copy dragged files into project" src="images/getting started 02.png" width="500" style="margin:15px;" />
+</center>
+
+<p>Select <strong>No</strong>, which will make Eclipse copy new files and folders into <code>libs</code> without deleting any existing files or folders.</p>
+<p>Finally, close and re-open the project, to allow Eclipse to index the Decoder API documentation that has just been added to the project.</p>
+<h2 id="intrasonics-decoder-permissions">Intrasonics Decoder Permissions</h2>
+<p>The Intrasonics Decoder receives audio from the device’s microphone, so it must declare that it requires permission to do so in the app’s manifest. Make sure that <code>AndroidManifest.xml</code> for your project contains the following:</p>
+<pre><code>&lt;uses-permission android:name=&quot;android.permission.RECORD_AUDIO&quot; /&gt;</code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<p>Read the <a href="Decoder%20Basics.html">Decoder Basics</a> page for a description of the what's included in the SDK Decoder Library zip file, and what you need to know to use the Decoder.</p>
+Then jump to one of the pages describing an example app (<a href="Trigger%20Engine%20Example%20Project.html">Trigger Engine</a>, <a href="Event%20Engine%20Example%20Project.html">Event Engine</a> or <a href="Heartbeat%20Engine%20Example%20Project.html">Heartbeat Engine</a>), to see how the Decoder Library should be used in your project.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="overview-summary.html">Prev</a>
+</li><li>
+<a href="Decoder%20Basics.html">Next</a>
+</li></ul></div>
+</body>
+</html>

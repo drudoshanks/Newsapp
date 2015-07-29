@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Decoder%20Basics.html">Prev</a>
+</li><li>
+<a href="Trigger%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+<h1 id="decoder-confidence">Decoder Confidence</h1>
+<p>The Intrasonics Decoder constantly assesses how confident it is that it's receiving Intrasonics-encoded audio. It reports changes in this confidence to any object that has registered as a Decoder listener, and has therefore implemented the <code>onDecoderConfidenceChanged</code> method.</p>
+<p>The Decoder passes a <code>DecoderConfidence</code> object to the listener method, that can take one of the following values:</p>
+<ul>
+<li><code>DecoderConfidence.Invalid</code></li>
+<li><code>DecoderConfidence.Low</code></li>
+<li><code>DecoderConfidence.Medium</code></li>
+<li><code>DecoderConfidence.High</code></li>
+</ul>
+<p>An Invalid confidence indicates that the decoder is not running, or has recently been started and has not yet received enough audio to deduce whether it's Intrasonics-encoded or not.</p>
+<h2 id="decoder-confidence-animations">Decoder Confidence Animations</h2>
+<p>Intrasonics has a standard set of animations for displaying decoder confidence in the user interface. The images and code required for these animations are included in the Decoder Library, in the <code>res/anim</code> and <code>res/drawable</code> folders (see <a href="Decoder%20Basics.html">Decoder Basics</a>).</p>
+<p>There are three animations for the three valid Decoder confidence levels, and a static image for <code>Invalid</code>. Example code for using these can be found in any of the example apps in the Decoder Library, and is easily transferred into any new app that incorporates the Intrasonics Decoder.</p>
+<p>Assuming that the app has an <code>ImageView</code> called <code>confidenceImage</code>, it should set the ImageView's image to <code>drawable/i_blue.png</code> (this can be done in the app's layout, or in the onCreate method of the app's Activity).</p>
+<p>Then, when a confidence change is received from the Decoder, it should perform the following code (or something similar) on the UI thread:</p>
+<pre><code>if (confidence == DecoderConfidence.Invalid)
+{
+    // Stop and remove animation
+    AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+    if (iAnimation != null &amp;&amp; iAnimation.isRunning())
+    {
+        iAnimation.stop();
+    }
+    confidenceImage.setBackgroundResource(0);
+}
+else
+{
+    // Apply animation
+    if (confidence == DecoderConfidence.High)
+    {
+        confidenceImage.setBackgroundResource(R.anim.i_anim_3);
+    }
+    else if (confidence == DecoderConfidence.Medium)
+    {
+        confidenceImage.setBackgroundResource(R.anim.i_anim_2);
+    }
+    else
+    {
+        confidenceImage.setBackgroundResource(R.anim.i_anim_1);
+    }
+
+    // Start the animation, if not already animating
+    AnimationDrawable iAnimation = (AnimationDrawable)confidenceImage.getBackground();
+    if (iAnimation != null &amp;&amp; !iAnimation.isRunning())
+    {
+        iAnimation.start();
+    }
+}</code></pre>
+The included animations look like this:
+<center>
+
+<table>
+<thead>
+<tr class="header">
+<th align="left">Invalid</th>
+<th align="left">Low</th>
+<th align="left">Medium</th>
+<th align="left">High</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><img alt="Low confidence animation" src="images/i_blue.png" width="120"/></td>
+<td align="left"><img alt="Low confidence animation" src="images/i_anim_1.gif" width="120"/></td>
+<td align="left"><img alt="Low confidence animation" src="images/i_anim_2.gif" width="120"/></td>
+<td align="left"><img alt="Low confidence animation" src="images/i_anim_3.gif" width="120"/></td>
+</tr>
+</tbody>
+</table>
+</center>
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Decoder%20Basics.html">Prev</a>
+</li><li>
+<a href="Trigger%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+</body>
+</html>

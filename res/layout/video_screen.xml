@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/list_bcg" >
+
+    <eu.erikw.PullToRefreshListView
+        android:id="@+id/video_screen_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/red_back"
+        android:divider="@drawable/video_list_divider"
+        android:dividerHeight="1dp"
+        android:scrollbars="none" >
+    </eu.erikw.PullToRefreshListView>
+
+</RelativeLayout>

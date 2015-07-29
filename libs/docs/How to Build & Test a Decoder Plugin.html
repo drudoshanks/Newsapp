@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Intrasonics%20Decoder%20Plugin%20Integration.html">Prev</a>
+</li><li>
+<a href="Plugin%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+<h1 id="how-to-build-test-a-decoder-plugin">How to Build &amp; Test a Decoder Plugin</h1>
+<blockquote>
+<p><strong>Note:</strong> <em>In order to use a Decoder Plugin in the PluginEngineExample, a token that explicitly allows the Plugin Engine is required (evaluation SDK tokens do <strong>not</strong> allow the Plugin Engine). Please contact Intrasonics for a Plugin Engine-compatible token.</em></p>
+</blockquote>
+<p>The provided projects are expected to be used with Eclipse in a Unix environment. If the projects are to be developed under Windows, the developer should install Cygwin to get the appropriate UNIX tools;</p>
+<ul>
+<li><p>Download and install the latest version of Eclipse from <a href="https://www.eclipse.org" target="eclipse.org">https://www.eclipse.org</a> (on some platforms you may need to install Java SE as well)</p></li>
+<li><p>Download and install the latest version of the Android Developer Tools plugin for Eclipse from <a href="http://developer.android.com/tools/help/adt.html" target="android.adt">http://developer.android.com/tools/help/adt.html</a></p></li>
+<li><p>Download and install the latest version of the Android NDK from <a href="http://developer.android.com/tools/sdk/ndk/index.html" target="android.ndk">http://developer.android.com/tools/sdk/ndk/index.html</a></p></li>
+<li><p>Create an environment variable <code>NDK_HOME</code> pointing to the install location of the NDK.</p></li>
+<li><p>Add the NDK install location to your <code>PATH</code> environment variable.</p></li>
+<li><p>Download the Decoder plugin SDK from <a href="http://portal.intrasonics.com" target="portal">http://portal.intrasonics.com</a>.</p></li>
+<li><p>Open a new Eclipse workspace and import the following projects:</p>
+<ul>
+<li><p><code>&lt;path-to-test-harness&gt;/PluginEngineExample</code> as an Android project</p></li>
+<li><p><code>&lt;path-to-test-harness&gt;/TestPlugin</code> as a C/C++ Makefile project <em>(ensure that you choose the Android toolchain rather than the default option of None)</em></p></li>
+</ul></li>
+<li><p>Build all (ensure that they build in the correct order);</p>
+<ol style="list-style-type: decimal">
+<li><code>TestPlugin</code> <em>(ensure that the <code>libTestPlugin.so</code> has been copied to <code>Example/libs/armeabi</code>)</em></li>
+<li><code>Example</code></li>
+</ol></li>
+<li><p>Ensure that a handset is connected and that Eclipse can see it through the DDMS perspective.</p></li>
+<li><p>Right click on the Example project and select <strong>Run As</strong> -&gt; <strong>Android Application</strong>.</p></li>
+</ul>
+It is expected that most plugins would be started from the Test Plugin sample project and modified to suit the developer's particular needs.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Intrasonics%20Decoder%20Plugin%20Integration.html">Prev</a>
+</li><li>
+<a href="Plugin%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+</body>
+</html>

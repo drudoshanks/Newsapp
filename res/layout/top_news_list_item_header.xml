@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/top_list_item_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="#80F2F2F2"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/top_list_item_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:singleLine="true"
+                    android:text="कांग्रेस उपाध्यक्ष राहुल गांधी लोकसभा में आज फिर सत्ता पक्ष के निशाने पर थे।"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/top_list_item_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:singleLine="true"
+                    android:text="राहुल पर ढकोसले की राजनीति करने का आरोप लगाते हुए कहा कि अमेठी में मेगा फूड पार्क प्रोजेक्ट को लेकर वह संसद"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </FrameLayout>
+
+</RelativeLayout>

@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="styles.css" type="text/css" />
+</head>
+<body>
+<div class="topNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Trigger%20Engine%20Example%20Project.html">Prev</a>
+</li><li>
+<a href="Heartbeat%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+<h1 id="event-engine-example-project">Event Engine Example Project</h1>
+<p>The Event Engine allows a sequence of timed events to be defined for a piece of audio, and when played that audio (assuming that it has been corrrectly encoded with Event Engine codewords) the Event Engine generates events at the times specified and passes them to the Engine listener.</p>
+<p>Included with the SDK Decoder Library is an example app that uses the Event Engine, called <strong>EventEngineExample</strong>. Feel free to examine the app’s source code to aid your understanding of how to integrate the Intrasonics Decoder and Event Engine into your app, and how to configure the Event Engine. You may copy any useful code into your own project.</p>
+<h2 id="building-and-running-the-event-engine-example">Building and Running the Event Engine Example</h2>
+<p>After unzipping the Event Engine example app zip file <strong>EventEngineExample.zip</strong>, import the project into Eclipse. From the <code>File</code> menu, select <code>Import...</code>, then open the <code>General</code> category and select <code>Existing Projects into Workspace</code>. Follow the prompts to import the project.</p>
+<p>You should now be able to build and run the app on an Android device.</p>
+<p>If you need guidance on building and running Android applications, refer to the Android Developer’s Guide, at <a href="http://developer.android.com/guide" target="developer.android.com.guide">http://developer.android.com/guide</a>, specifically the section on <strong>Building and Running</strong>: <a href="http://developer.android.com/guide/developing/building" target="developer.android.com.guide.building">http://developer.android.com/guide/developing/building</a>.</p>
+<p>The example app connects to and configures the Event Engine with a pre-defined set of events that correspond to the Event Engine encoding in the sample audio tracks <strong>BBBAudio_EventEngine_31739.wav</strong> and <strong>BBBAudio_EventEngine_31741.wav</strong>, available from the <a href="https://portal.intrasonics.com/resources/12" target="portal.resource.12">Developer Portal</a>. Playing the first of those tracks to the running example app should result in the following output to the screen, showing the Event Engine events as they're generated in response to the audio.</p>
+<center>
+<img alt="Event Engine example app output" src="images/event engine screen 00.png" width="320" />
+</center>
+
+<p>You can experiment with this sample content to get a feel for how the Event Engine works. Try skipping forwards and backwards, or rewind back to the beginning, to see how events are generated and how the sequence resyncs with the audio.</p>
+<h2 id="notes-on-the-app-code">Notes on the App Code</h2>
+<p>The following fragments of code correspond to the steps outlined in <strong>Using the Intrasonics Decoder</strong> in <a href="Decoder%20Basics.html">Decoder Basics</a>:</p>
+<p><strong>1. Instantiate the Decoder singleton</strong></p>
+<p>This is a single line of code, to instantiate (if not instantiated before) and get a reference to the Decoder singleton:</p>
+<pre><code>Decoder mDecoder = Decoder.getInstance();</code></pre>
+<p><strong>2. Pass the Application Context to the Decoder</strong></p>
+<pre><code>mDecoder.setApplicationContext(getApplicationContext());</code></pre>
+<p><strong>3. Register as a Decoder listener</strong></p>
+<p>The Example app's main Activity class implements the <code>DecoderListener</code> interface, allowing it to receive state change, failure and confidence messages (see <a href="com/intrasonics/DecoderListener.html">DecoderListener</a>) by registering as a Decoder listener:</p>
+<pre><code>mDecoder.registerListener(this);</code></pre>
+<p><strong>4. Pass a token to the Decoder</strong></p>
+<p>The app reads a Decoder token from a file and passes it to the Decoder. This is the simplest behaviour, but as the Decoder expects the token in a Java String, it should be quite simple to implement other approaches, such as downloading from a web server.</p>
+<pre><code>private String mTokenFileName = &quot;Token.json&quot;;
+    .
+    .
+mDecoder.setToken(readTokenFromFile(mTokenFileName));
+    .
+    .
+/**
+ * Read a token file into a string, ready for passing to the decoder.
+ * 
+ * @param fileName The name of the file containing the token data
+ * 
+ * @return A String holding the contents of the specified file
+ * 
+ * @throws IOException Upon failure to open and read the file
+ */
+public String readTokenFromFile(String fileName) throws IOException
+{
+    .
+    .
+}</code></pre>
+<p><strong>5. Connect as an Engine listener</strong></p>
+<p>The Example app's main Activity class implements the <code>IEventEngineListener</code> interface, allowing it to receive events from the Event Engine via the <code>onEventEngineEvent()</code> method after connecting to the Event Engine with <code>connectEngineListener</code>:</p>
+<pre><code>eventEngine = (IEventEngine)mDecoder.connectEngineListener(this, IEventEngine.class);</code></pre>
+<p><strong>6. Configure the Event Engine</strong></p>
+<p>The Event Engine Example passes a Java <code>String</code> defining a block of JSON into the Decoder, containing a set of events for the audio track <strong>BBBAudio_EventEngine_31739.wav</strong> that's available from the <a href="https://portal.intrasonics.com/resources/12" target="portal.resource.12">Developer Portal</a>. The track has been encoded for the Event Engine, using the track identifier <code>31739</code>. The final argument to <code>registerEventSequence()</code> is the synchronisation timeout (in seconds), which tells the Event Engine that if it hasn't received a codeword (either the track identifier or a sync codeword) for 30 seconds, it should time out and stop generating events.</p>
+<pre><code>if (eventEngine != null)
+{
+    EventEngineResponse result = eventEngine.registerEventSequence(31739,
+        &quot;{\&quot;events\&quot;:[&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-01\&quot;,\&quot;time\&quot;:25.30},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-02\&quot;,\&quot;time\&quot;:41.74},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-03\&quot;,\&quot;time\&quot;:45.81},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-04\&quot;,\&quot;time\&quot;:46.81},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-05\&quot;,\&quot;time\&quot;:47.81},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-06\&quot;,\&quot;time\&quot;:50.25},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-07\&quot;,\&quot;time\&quot;:72.12},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-08\&quot;,\&quot;time\&quot;:81.80},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-09\&quot;,\&quot;time\&quot;:88.95},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-10\&quot;,\&quot;time\&quot;:97.86},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-11\&quot;,\&quot;time\&quot;:99.40},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-12\&quot;,\&quot;time\&quot;:110.00},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-13\&quot;,\&quot;time\&quot;:120.00},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-14\&quot;,\&quot;time\&quot;:130.15},&quot; +
+            &quot;{\&quot;id\&quot;:\&quot;BBBAudio-31739-15\&quot;,\&quot;time\&quot;:180.00}&quot; +
+        &quot;]}&quot;,
+        30);
+    if (!(result instanceof ResponseOK))
+    {
+        uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeFailed, result.description));
+    }
+}</code></pre>
+<p>The Event Engine Example code repeats this operation to configure a different set of events for the audio track <strong>BBBAudio_EventEngine_31741.wav</strong>, which is also available from the <a href="https://portal.intrasonics.com/resources/12" target="portal.resource.12">Developer Portal</a>.</p>
+<p><strong>7. Start the Decoder</strong></p>
+<p>Finally, the Decoder is started.</p>
+<pre><code>mDecoder.startDecoding();</code></pre>
+<h2 id="decoding-audio">Decoding Audio</h2>
+<p>When Intrasonics-encoded content is subsequently played to the Event Engine Example app, provided it has been encoded for the Event Engine using a track identifier that is authorised by the licence token, the app will receive the events that have been registered for the track, at the times specified, through the <code>onEventEngineEvent</code> method:</p>
+<pre><code>/**
+ * IEventEngineListener method for handling an event generated by the Event Engine.
+ * 
+ * @param event The event received from the Event Engine
+ */
+public void onEventEngineEvent(EventEngineEvent event)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeEvent, event));
+}</code></pre>
+<p>The Event Engine Example app simply passes the codeword data to the main UI thread, so that it can displayed on the app's UI.</p>
+<p>The Decoder will also inform the app of changes in confidence, to reflect how sure it is that it is receiving Intrasonics-encoded audio, through the <code>onDecoderConfidenceChanged</code> method:</p>
+<pre><code>public void onDecoderConfidenceChanged(DecoderConfidence confidence)
+{
+    uiUpdateHandler.sendMessage(uiUpdateHandler.obtainMessage(msgTypeConfidence, confidence));
+}</code></pre>
+Again, the Event Engine Example app simply passes the confidence information to the main UI thread, so that the UI can be updated with the new value.
+<div class="bottomNav">
+<ul class="navList"><li class="navBarCell1Rev">
+<a href="overview-summary.html">Overview</a>
+</li></ul>
+<div class="aboutLanguage">
+<em>SDK version 2.0.2</em>
+</div>
+</div>
+<div class="subNav"><ul class="navList"><li>
+<a href="Trigger%20Engine%20Example%20Project.html">Prev</a>
+</li><li>
+<a href="Heartbeat%20Engine%20Example%20Project.html">Next</a>
+</li></ul></div>
+</body>
+</html>
